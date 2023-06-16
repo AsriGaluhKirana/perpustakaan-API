@@ -1,17 +1,21 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']="postgresql://postgres:1@localhost:5432/perpustakaan"
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 #tabel Buku
 class Buku(db.Model):
     __tablename__ = "buku"
     id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
     judul = db.Column(db.String, nullable=False)
-    id_penulis = db.Column(db.String, nullable=False)
+    id_penulis = db.Column(db.String, db.ForeignKey("penulis.id"), nullable=False)
     tgl_terbit = db.Column(db.Date, nullable=False)
+    
 
 #tabel penulis
 class Penulis(db.Model):
@@ -19,15 +23,16 @@ class Penulis(db.Model):
     id = db.Column(db.String, primary_key=True, nullable=False)
     nama = db.Column(db.String, nullable=False)
     kebangsaan = db.Column(db.String, nullable=False)
+    buku = db.relationship('Buku', backref="penulis", lazy="dynamic")
     
 #tabel kategori
-class kategori(db.Model):
+class Kategori(db.Model):
     __tablename__ = "kategori"
     id_kategori = db.Column(db.String, primary_key=True, nullable=False)
     nama_kategori = db.Column(db.String, nullable=False)
     
 #table pengguna
-
+# class Pengguna(db.Model):
 
 transactions = []
 # Endpoint untuk mendapatkan daftar semua buku
@@ -39,6 +44,7 @@ def get_books():
             'id': b.id,
             'judul' : b.judul,
             'id_penulis' : b.id_penulis,
+            'nama_penulis' : b.penulis.nama,
             'tgl_terbit' : b.tgl_terbit
         } for b in data
     ]
