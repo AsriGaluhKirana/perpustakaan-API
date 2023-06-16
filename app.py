@@ -14,8 +14,8 @@ class Buku(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True, nullable=False)
     judul = db.Column(db.String, nullable=False)
     id_penulis = db.Column(db.String, db.ForeignKey("penulis.id"), nullable=False)
+    id_kategori = db.Column(db.String, db.ForeignKey("kategori.id_kategori"))
     tgl_terbit = db.Column(db.Date, nullable=False)
-    
 
 #tabel penulis
 class Penulis(db.Model):
@@ -30,6 +30,7 @@ class Kategori(db.Model):
     __tablename__ = "kategori"
     id_kategori = db.Column(db.String, primary_key=True, nullable=False)
     nama_kategori = db.Column(db.String, nullable=False)
+    buku = db.relationship('Buku', backref="kategori", lazy="dynamic")
     
 #table pengguna
 class Pengguna(db.Model):
@@ -39,9 +40,8 @@ class Pengguna(db.Model):
     nama = db.Column(db.String)
     kontak = db.Column(db.String)
     tipe = db.Column(db.String)
-    relation_transaksi = db.relationship('Transaksi', backref='pengguna', lazy='dynamic')
+    # relation_transaksi = db.relationship('Transaksi', backref='pengguna', lazy='dynamic')
     
-transactions = []
 # Endpoint untuk mendapatkan daftar semua buku
 @app.route('/buku', methods=['GET'])
 def get_books():
@@ -52,6 +52,7 @@ def get_books():
             'judul' : b.judul,
             'id_penulis' : b.id_penulis,
             'nama_penulis' : b.penulis.nama,
+            'kategori' : b.kategori.nama,
             'tgl_terbit' : b.tgl_terbit
         } for b in data
     ]
@@ -140,6 +141,32 @@ def delete_penulis(id):
     return{
         'success': 'Penulis berhasil dihapus'
     } 
+
+# Endpoint untuk mendapatkan daftar semua kategori
+@app.route('/kategori', methods=['GET'])
+def get_genre():
+    data = Kategori.query.all()
+    response = [
+        {
+            'id_kategori': k.id_kategori,
+            'nama_kategori' : k.nama_kategori,
+        } for k in data
+    ]
+    return {'count': len(response), 'data':response}
+
+# Endpoint untuk menambahkan daftar kategori
+@app.route('/kategori', methods=['POST'])
+def create_genre():
+    data = request.get_json()
+    new_kategori = Kategori(
+        id_kategori = data.get('id_kategori'),
+        nama_kategori = data.get('nama_kategori')
+    )
+    db.session.add(new_kategori)
+    db.session.commit()
+    return {"message": "Hore! Kategori berhasil di tambahkan."}
+
+
 
 # # Endpoint untuk membuat peminjaman buku
 # @app.route('/transaksi', methods=['POST'])
