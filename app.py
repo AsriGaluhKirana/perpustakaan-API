@@ -166,7 +166,26 @@ def create_genre():
     db.session.commit()
     return {"message": "Hore! Kategori berhasil di tambahkan."}
 
+# Endpoint untuk mengupdate kategori
+@app.route('/kategori/<id>', methods=['PUT'])
+def update_kategori(id):
+    kategori = Kategori.query.filter_by(id_kategori=id).first_or_404()
+    data = request.get_json()
+    kategori.id_kategori = data.get('id_kategori'),
+    kategori.nama_kategori = data.get('nama_kategori'),
+    db.session.add(kategori)
+    db.session.commit()
+    return {"message": "Hore! Kategori berhasil diupdate."}
 
+# Endpoint untuk menghapus data kategori
+@app.route('/kategori/<id>', methods=['DELETE'])
+def delete_kategori(id):
+    data = Kategori.query.filter_by(id_kategori=id).first_or_404()
+    db.session.delete(data)
+    db.session.commit()
+    return{
+        'success': 'Kategori berhasil dihapus'
+    } 
 
 # # Endpoint untuk membuat peminjaman buku
 # @app.route('/transaksi', methods=['POST'])
