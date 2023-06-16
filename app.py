@@ -32,8 +32,15 @@ class Kategori(db.Model):
     nama_kategori = db.Column(db.String, nullable=False)
     
 #table pengguna
-# class Pengguna(db.Model):
-
+class Pengguna(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String, unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    nama = db.Column(db.String)
+    kontak = db.Column(db.String)
+    tipe = db.Column(db.String)
+    relation_transaksi = db.relationship('Transaksi', backref='pengguna', lazy='dynamic')
+    
 transactions = []
 # Endpoint untuk mendapatkan daftar semua buku
 @app.route('/buku', methods=['GET'])
