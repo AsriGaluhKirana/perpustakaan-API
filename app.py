@@ -15,7 +15,7 @@ class Buku(db.Model):
 
 #tabel penulis
 class Penulis(db.Model):
-    __tablename__ = "penulis"
+    __tablename__ = "penulisa"
     id = db.Column(db.String, primary_key=True, nullable=False)
     nama = db.Column(db.String, nullable=False)
     kebangsaan = db.Column(db.String, nullable=False)
