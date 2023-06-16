@@ -1,0 +1,11 @@
+(jangan lanjut kalau tahapan sebelumnya belum tuntas):
+
+1. Buat struktur tabel2 nya di database (termasuk relasi antar table)
+2. Buat model/class di python sesuai dg database yg sudah dibuat (termasuk setting relationship antar kelas)
+3. Buat endpoint API nya
+
+---
+Buat jg repository project nya di github.
+Kalau bisa setiap selesai satu step, push code nya ke github dan
+laporkan di skype. Supaya bisa langsung dicek dan dapat feedback
+(tapi nggak perlu diam nunggu feedback. Nunggunya sambil mengerjakan step berikutnya aja)
