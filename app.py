@@ -42,6 +42,26 @@ class Pengguna(db.Model):
     tipe = db.Column(db.String)
     # relation_transaksi = db.relationship('Transaksi', backref='pengguna', lazy='dynamic')
     
+def login():
+    username = request.authorization.get("username")
+    password = request.authorization.get("password")
+    
+    try:
+        global user
+        user = Pengguna.query.filter_by(email=username).first_or_404()
+    except:
+        return {
+            'error message' : 'Hayo salah.'
+        }
+        
+    if user.password == password:
+        if user.tipe == 'Admin':
+            return 'Admin'
+        elif user.tipe == 'Member':
+            return 'Member'
+    else:
+        return 'Password salah!'
+    
 # Endpoint untuk mendapatkan daftar semua buku
 @app.route('/buku', methods=['GET'])
 def get_books():
@@ -61,38 +81,47 @@ def get_books():
 # Endpoint untuk menambahkan daftar buku
 @app.route('/buku', methods=['POST'])
 def create_book():
-    data = request.get_json()
-    new_buku = Buku(
-        id = data.get('id'),
-        judul = data.get('judul'),
-        id_penulis = data.get('id_penulis'),
-        tgl_terbit = data.get('tgl_terbit')
-    )
-    db.session.add(new_buku)
-    db.session.commit()
-    return {"message": "Hore! Buku berhasil di tambahkan."}
-
+    if login() == 'Admin':
+        data = request.get_json()
+        new_buku = Buku(
+            id = data.get('id'),
+            judul = data.get('judul'),
+            id_penulis = data.get('id_penulis'),
+            tgl_terbit = data.get('tgl_terbit')
+        )
+        db.session.add(new_buku)
+        db.session.commit()
+        return {"message": "Hore! Buku berhasil di tambahkan."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"} 
+    
 # Endpoint untuk menghapus data buku
 @app.route('/buku/<id>', methods=['DELETE'])
 def delete_buku(id):
-    data = Buku.query.filter_by(id=id).first_or_404()
-    db.session.delete(data)
-    db.session.commit()
-    return{
-        'success': 'Buku berhasil dihapus'
-    } 
+    if login() == 'Admin':
+        data = Buku.query.filter_by(id=id).first_or_404()
+        db.session.delete(data)
+        db.session.commit()
+        return{
+            'success': 'Buku berhasil dihapus'
+        }
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk mengupdate buku
 @app.route('/buku/<id>', methods=['PUT'])
 def update_buku(id):
-    buku = Buku.query.filter_by(id=id).first_or_404()
-    data = request.get_json()
-    buku.judul = data.get('judul'),
-    buku.id_penulis = data.get('id_penulis'),
-    buku.tgl_terbit = data.get('tgl_terbit')
-    db.session.add(buku)
-    db.session.commit()
-    return {"message": "Hore! Buku berhasil diupdate."}
+    if login() == 'Admin':
+        buku = Buku.query.filter_by(id=id).first_or_404()
+        data = request.get_json()
+        buku.judul = data.get('judul'),
+        buku.id_penulis = data.get('id_penulis'),
+        buku.tgl_terbit = data.get('tgl_terbit')
+        db.session.add(buku)
+        db.session.commit()
+        return {"message": "Hore! Buku berhasil diupdate."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk mendapatkan daftar semua penulis
 @app.route('/penulis', methods=['GET'])
@@ -110,37 +139,46 @@ def get_author():
 # Endpoint untuk menambahkan daftar penulis
 @app.route('/penulis', methods=['POST'])
 def create_author():
-    data = request.get_json()
-    new_penulis = Penulis(
-        id = data.get('id'),
-        nama = data.get('nama'),
-        kebangsaan = data.get('kebangsaan')
-    )
-    db.session.add(new_penulis)
-    db.session.commit()
-    return {"message": "Hore! Penulis berhasil di tambahkan."}
+    if login() == 'Admin':
+        data = request.get_json()
+        new_penulis = Penulis(
+            id = data.get('id'),
+            nama = data.get('nama'),
+            kebangsaan = data.get('kebangsaan')
+        )
+        db.session.add(new_penulis)
+        db.session.commit()
+        return {"message": "Hore! Penulis berhasil di tambahkan."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk mengupdate penulis
 @app.route('/penulis/<id>', methods=['PUT'])
 def update_penulis(id):
-    penulis = Penulis.query.filter_by(id=id).first_or_404()
-    data = request.get_json()
-    penulis.id_penulis = data.get('id_penulis'),
-    penulis.nama = data.get('nama'),
-    penulis.kebangsaan = data.get('kebangsaan')
-    db.session.add(penulis)
-    db.session.commit()
-    return {"message": "Hore! Penulis berhasil diupdate."}
+    if login() == 'Admin':
+        penulis = Penulis.query.filter_by(id=id).first_or_404()
+        data = request.get_json()
+        penulis.id_penulis = data.get('id_penulis'),
+        penulis.nama = data.get('nama'),
+        penulis.kebangsaan = data.get('kebangsaan')
+        db.session.add(penulis)
+        db.session.commit()
+        return {"message": "Hore! Penulis berhasil diupdate."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk menghapus data penulis
 @app.route('/penulis/<id>', methods=['DELETE'])
 def delete_penulis(id):
-    data = Penulis.query.filter_by(id=id).first_or_404()
-    db.session.delete(data)
-    db.session.commit()
-    return{
-        'success': 'Penulis berhasil dihapus'
-    } 
+    if login() == 'Admin':
+        data = Penulis.query.filter_by(id=id).first_or_404()
+        db.session.delete(data)
+        db.session.commit()
+        return{
+            'success': 'Penulis berhasil dihapus'
+        }
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk mendapatkan daftar semua kategori
 @app.route('/kategori', methods=['GET'])
@@ -157,35 +195,44 @@ def get_genre():
 # Endpoint untuk menambahkan daftar kategori
 @app.route('/kategori', methods=['POST'])
 def create_genre():
-    data = request.get_json()
-    new_kategori = Kategori(
-        id_kategori = data.get('id_kategori'),
-        nama_kategori = data.get('nama_kategori')
-    )
-    db.session.add(new_kategori)
-    db.session.commit()
-    return {"message": "Hore! Kategori berhasil di tambahkan."}
+    if login() == 'Admin':
+        data = request.get_json()
+        new_kategori = Kategori(
+            id_kategori = data.get('id_kategori'),
+            nama_kategori = data.get('nama_kategori')
+        )
+        db.session.add(new_kategori)
+        db.session.commit()
+        return {"message": "Hore! Kategori berhasil di tambahkan."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk mengupdate kategori
 @app.route('/kategori/<id>', methods=['PUT'])
 def update_kategori(id):
-    kategori = Kategori.query.filter_by(id_kategori=id).first_or_404()
-    data = request.get_json()
-    kategori.id_kategori = data.get('id_kategori'),
-    kategori.nama_kategori = data.get('nama_kategori'),
-    db.session.add(kategori)
-    db.session.commit()
-    return {"message": "Hore! Kategori berhasil diupdate."}
+    if login() == 'Admin':
+        kategori = Kategori.query.filter_by(id_kategori=id).first_or_404()
+        data = request.get_json()
+        kategori.id_kategori = data.get('id_kategori'),
+        kategori.nama_kategori = data.get('nama_kategori'),
+        db.session.add(kategori)
+        db.session.commit()
+        return {"message": "Hore! Kategori berhasil diupdate."}
+    else:
+        return {"message": "Eits, kamu bukan admin!"}
 
 # Endpoint untuk menghapus data kategori
 @app.route('/kategori/<id>', methods=['DELETE'])
 def delete_kategori(id):
-    data = Kategori.query.filter_by(id_kategori=id).first_or_404()
-    db.session.delete(data)
-    db.session.commit()
-    return{
-        'success': 'Kategori berhasil dihapus'
-    } 
+    if login() == 'Admin':
+        data = Kategori.query.filter_by(id_kategori=id).first_or_404()
+        db.session.delete(data)
+        db.session.commit()
+        return{
+            'success': 'Kategori berhasil dihapus'
+        }
+    else:
+        return {"message": "Eits, kamu bukan admin!"} 
 
 # # Endpoint untuk membuat peminjaman buku
 # @app.route('/transaksi', methods=['POST'])
